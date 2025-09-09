@@ -1,0 +1,45 @@
+# === Сборка CMake ===
+build/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+install_manifest.txt
+compile_commands.json
+
+# === Бинарники и объектные файлы ===
+*.so
+*.so.*
+*.dll
+*.dylib
+*.a
+*.o
+*.obj
+*.exe
+a.out
+
+# === Временные файлы ===
+*.swp
+*.swo
+*.tmp
+*~
+
+# === Редакторы и IDE ===
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.DS_Store
+Thumbs.db
+
+# === Python (если будешь использовать) ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# === Логи и отладка ===
+*.log
+*.trace
+
+# === Системные файлы ===
+._*
