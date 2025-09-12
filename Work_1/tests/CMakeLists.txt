@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.24)
 project(work1_tests LANGUAGES CXX)
 
+set(DCMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES OFF)
+set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_LIBRARIES OFF)
+set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_OBJECTS OFF)
+set(DCMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Закомментируем эти строки, так как файлов нет
 # include(../../cmake/deps/gtest.cmake)
 # include(../../cmake/deps/eigen.cmake)

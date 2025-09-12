@@ -23,6 +23,7 @@ a.out
 *.swo
 *.tmp
 *~
+.cache
 
 # === Редакторы и IDE ===
 .vscode/settings.json
