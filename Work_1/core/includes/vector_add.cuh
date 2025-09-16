@@ -21,6 +21,9 @@ __global__ void vector_add_kernel(const float* a, const float* b, float* c, int 
  */
 int vector_add(const float* a, const float* b, float* c, int n);
 
+// Объявление функции для CPU
+void vector_add_cpu(const float* a, const float* b, float* c, int n);
+
 #ifdef __cplusplus
 }
 #endif

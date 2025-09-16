@@ -9,6 +9,13 @@ __global__ void vector_add_kernel(const float* a, const float* b, float* c, int 
   }
 }
 
+// Реализация сложения векторов на CPU.
+void vector_add_cpu(const float* a, const float* b, float* c, int n) {
+    for (int i = 0; i < n; ++i) {
+        c[i] = a[i] + b[i];
+    }
+}
+
 int vector_add(const float* a, const float* b, float* c, int n) {
   float *d_a = nullptr, *d_b = nullptr, *d_c = nullptr;
   size_t size = n * sizeof(float);

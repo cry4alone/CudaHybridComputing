@@ -7,12 +7,7 @@
 // Подключаем заголовочный файл
 #include "vector_add.cuh"
 
-// Реализация сложения векторов на CPU.
-void vector_add_cpu(const float* a, const float* b, float* c, int n) {
-    for (int i = 0; i < n; ++i) {
-        c[i] = a[i] + b[i];
-    }
-}
+
 
 
 // Максимально допустимая погрешность при сравнении чисел с плавающей точкой.
