@@ -45,9 +45,9 @@ find_package(Eigen3 3.4.0 REQUIRED)
 
 add_subdirectory(core)
 
-# if(ENABLE_TESTS)
-#     add_subdirectory(tests)
-# endif()
+if(ENABLE_TESTS)
+    add_subdirectory(tests)
+endif()
 
 # if(ENABLE_BENCH)
 #     add_subdirectory(benchmark)

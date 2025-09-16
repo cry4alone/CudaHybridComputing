@@ -9,7 +9,7 @@ __global__ void vector_add_kernel(const float* a, const float* b, float* c, int 
   }
 }
 
-void vector_add_launch(const float* a, const float* b, float* c, int n) {
+int vector_add(const float* a, const float* b, float* c, int n) {
   float *d_a = nullptr, *d_b = nullptr, *d_c = nullptr;
   size_t size = n * sizeof(float);
 
@@ -30,4 +30,6 @@ void vector_add_launch(const float* a, const float* b, float* c, int n) {
   cudaFree(d_a);
   cudaFree(d_b);
   cudaFree(d_c);
+
+  return 0;
 }

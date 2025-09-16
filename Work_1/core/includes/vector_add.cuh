@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-__global__ void vector_add_kernel(float* a, float* b, float* c, int n);
+__global__ void vector_add_kernel(const float* a, const float* b, float* c, int n);
 
 /**
  * @brief Складывает два вектора на GPU: C = A + B
