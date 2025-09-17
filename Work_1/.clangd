@@ -7,7 +7,7 @@ CompileFlags:
     - "-x"
     - "cuda"
     - "--cuda-path=/usr/local/cuda-12.5"
-    - "--cuda-gpu-arch=sm_50"
+    - "--cuda-gpu-arch=sm_75"
     - "-I/usr/local/cuda-12.5/include"
     - "-I${workspaceFolder}/core/includes"
     - "-std=c++20"

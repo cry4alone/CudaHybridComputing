@@ -2,7 +2,6 @@
 #include <cuda_runtime.h> 
 #include <vector>
 #include <random>
-#include <numeric>
 
 // Подключаем заголовочный файл
 #include "vector_add.cuh"
@@ -18,7 +17,7 @@ constexpr float MAX_ERROR = 1e-5f;
  * @brief Тестовый класс (fixture), который автоматически управляет 
  * выделением и освобождением памяти GPU для каждого теста.
  */
-class VectorAddTest : public ::testing::Test {
+class VectorAddTest:public::testing::Test {
 protected:
     // Этот метод вызывается автоматически после каждого теста для очистки ресурсов.
     void TearDown() override {
