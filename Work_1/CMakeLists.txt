@@ -44,6 +44,7 @@ endif()
 find_package(Eigen3 3.4.0 REQUIRED)
 
 add_subdirectory(core)
+set_target_properties(work1_core PROPERTIES CUDA_ARCHITECTURES 75)
 
 if(ENABLE_TESTS)
     add_subdirectory(tests)
