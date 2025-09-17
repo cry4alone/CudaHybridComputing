@@ -12,7 +12,7 @@ CompileFlags:
     - "-I${workspaceFolder}/core/includes"
     - "-std=c++20"
     - "-D__CLANGD__"
-    - "-D__CUDA_ARCH__=750"
+    - "-D__CUDA_ARCH__=500"
   Remove:
     - "-forward-unknown-to-host-compiler"
     - "-gencode*"
