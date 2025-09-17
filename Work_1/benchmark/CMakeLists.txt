@@ -14,10 +14,10 @@ set(DCMAKE_EXPORT_COMPILE_COMMANDS ON)
 find_package(CUDAToolkit REQUIRED)
 
 file(GLOB_RECURSE SRC
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cu
 )
 
-add_executable(work1_benchmarks ${SRC})
+add_executable(work1_benchmarks perf_benchmark.cu)
 
 target_compile_features(work1_benchmarks PRIVATE
     cxx_std_20

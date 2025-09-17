@@ -12,7 +12,7 @@ option(ENABLE_BENCH "Enable benchmarks" ON)
 
 # --- Настройка зависимостей ---
 include(FetchContent)
-include(GoogleTest) # Для gtest_discover_tests
+include(GoogleTest)
 
 # 1. Сначала загружаем GoogleTest
 if(ENABLE_TESTS OR ENABLE_BENCH)
@@ -50,6 +50,6 @@ if(ENABLE_TESTS)
     add_subdirectory(tests)
 endif()
 
-# if(ENABLE_BENCH)
-#     add_subdirectory(benchmark)
-# endif()
+if(ENABLE_BENCH)
+    add_subdirectory(benchmark)
+endif()
