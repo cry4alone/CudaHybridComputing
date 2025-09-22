@@ -1,4 +1,3 @@
-#include <cuda_runtime.h>
 #include "../includes/vector_add.cuh"
 
 __global__ void vector_add_kernel(const float* a, const float* b, float* c, int n) {
@@ -15,7 +14,7 @@ void vector_add_cpu(const float* a, const float* b, float* c, int n) {
     }
 }
 
-int vector_add(const float* a, const float* b, float* c, int n) {
+__host__ int vector_add(const float* a, const float* b, float* c, int n) {
   float *d_a = nullptr, *d_b = nullptr, *d_c = nullptr;
   size_t size = n * sizeof(float);
 

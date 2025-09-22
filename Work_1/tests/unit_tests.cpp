@@ -2,8 +2,6 @@
 #include <cuda_runtime.h> 
 #include <vector>
 #include <random>
-
-// Подключаем заголовочный файл
 #include "vector_add.cuh"
 
 

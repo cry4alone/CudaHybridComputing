@@ -30,7 +30,7 @@ __global__ void vector_add_kernel(const float* a, const float* b, float* c, int 
  * @param n Количество элементов
  * @return 0 при успехе, -1 при ошибке
  */
-int vector_add(const float* a, const float* b, float* c, int n);
+__host__ int vector_add(const float* a, const float* b, float* c, int n);
 
 /**
  * @brief Складывает два вектора на CPU: C = A + B

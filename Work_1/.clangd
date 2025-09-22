@@ -14,7 +14,6 @@ CompileFlags:
     - "-D__CLANGD__"
     - "-D__CUDA_ARCH__=750"
   Remove:
-    - "-forward-unknown-to-host-compiler"
     - "-gencode*"
     - "-Xcompiler=-fPIC"
     - "-rdc=true"

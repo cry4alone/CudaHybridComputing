@@ -6,7 +6,7 @@ find_package(CUDAToolkit REQUIRED)
 # ВАРИАНТ А: Закомментируем include и зададим архитектуру вручную
 # include(../../cmake/configs/cuda_arch.cmake)
 # Вместо этого устанавливаем архитектуру явно. Узнайте свою архитектуру (например, 75 для Turing, 86 для Ampere).
-set(CMAKE_CUDA_ARCHITECTURES 50) # ЗАМЕНИТЕ НА СВОЮ АРХИТЕКТУРУ!
+set(CMAKE_CUDA_ARCHITECTURES 75) # ЗАМЕНИТЕ НА СВОЮ АРХИТЕКТУРУ!
 
 set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES OFF)
 set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_LIBRARIES OFF)
