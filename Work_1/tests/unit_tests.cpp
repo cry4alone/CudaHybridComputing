@@ -1,125 +1,82 @@
 #include <gtest/gtest.h>
 #include <cuda_runtime.h> 
+#include <gtest/gtest.h>
 #include <vector>
-#include <random>
+#include <cstdlib> // Для rand()
+#include <ctime>   // Для time()
 #include "vector_add.cuh"
 
-
-
-
-// Максимально допустимая погрешность при сравнении чисел с плавающей точкой.
-constexpr float MAX_ERROR = 1e-5f;
-
-/**
- * @class VectorAddTest
- * @brief Тестовый класс (fixture), который автоматически управляет 
- * выделением и освобождением памяти GPU для каждого теста.
- */
-class VectorAddTest:public::testing::Test {
+// Создаем параметризованный тестовый класс.
+// Параметром будет размер векторов (std::size_t).
+class VectorAddComparisonTest : public ::testing::TestWithParam<std::size_t> {
 protected:
-    // Этот метод вызывается автоматически после каждого теста для очистки ресурсов.
-    void TearDown() override {
-        if (d_a) cudaFree(d_a);
-        if (d_b) cudaFree(d_b);
-        if (d_c) cudaFree(d_c);
+    // Инициализация генератора случайных чисел один раз для всех тестов
+    static void SetUpTestSuite() {
+        srand(static_cast<unsigned int>(time(nullptr)));
     }
-
-    // Вспомогательный метод для подготовки тестовых данных.
-    void PrepareData(int size) {
-        n = size;
-        if (n == 0) return;
-
-        size_t bytes = n * sizeof(float);
-
-        // 1. Готовим данные на хосте (CPU)
-        h_a.resize(n);
-        h_b.resize(n);
-        h_c_gpu_result.resize(n);
-
-        // Заполняем векторы случайными значениями для реалистичного теста.
-        std::mt19937 gen(1337); // Используем фиксированное начальное число (seed) для воспроизводимости тестов.
-        std::uniform_real_distribution<float> dis(-1000.0f, 1000.0f);
-        for (int i = 0; i < n; ++i) {
-            h_a[i] = dis(gen);
-            h_b[i] = dis(gen);
-        }
-
-        // 2. Выделяем память на устройстве (GPU)
-        cudaMalloc(&d_a, bytes);
-        cudaMalloc(&d_b, bytes);
-        cudaMalloc(&d_c, bytes);
-    }
-
-    // Основная логика: запускаем вычисления и проверяем результаты.
-    void RunAndVerify() {
-        if (n == 0) {
-            SUCCEED(); // Тест с нулевым количеством элементов считается успешным.
-            return;
-        }
-
-        size_t bytes = n * sizeof(float);
-
-        // 1. Вычисляем эталонный результат на CPU
-        std::vector<float> h_c_cpu_ref(n);
-        vector_add_cpu(h_a.data(), h_b.data(), h_c_cpu_ref.data(), n);
-
-        // 2. Копируем входные данные с хоста (CPU) на устройство (GPU)
-        cudaMemcpy(d_a, h_a.data(), bytes, cudaMemcpyHostToDevice);
-        cudaMemcpy(d_b, h_b.data(), bytes, cudaMemcpyHostToDevice);
-
-        // 3. Запускаем GPU-версию функции
-        vector_add(d_a, d_b, d_c, n);
-        // Проверяем, не было ли ошибок при запуске ядра на GPU
-        ASSERT_EQ(cudaGetLastError(), cudaSuccess) << "Ошибка запуска ядра";
-
-        // 4. Копируем результат обратно с устройства (GPU) на хост (CPU)
-        cudaMemcpy(h_c_gpu_result.data(), d_c, bytes, cudaMemcpyDeviceToHost);
-
-        // 5. Сравниваем результат GPU с эталонным результатом CPU
-        for (int i = 0; i < n; ++i) {
-            // ASSERT_NEAR используется для сравнения чисел с плавающей точкой
-            ASSERT_NEAR(h_c_cpu_ref[i], h_c_gpu_result[i], MAX_ERROR)
-                << "Расхождение в элементе с индексом " << i;
+    
+    // Вспомогательная функция для генерации вектора со случайными числами
+    void generate_random_vector(std::vector<float>& vec) {
+        for (float& val : vec) {
+            val = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
         }
     }
-
-    // Переменные-члены, доступные в каждом тесте
-    int n = 0; // Размер векторов
-    // Векторы в памяти хоста (CPU). 'h_' от "host"
-    std::vector<float> h_a, h_b, h_c_gpu_result; 
-    // Указатели на память устройства (GPU). 'd_' от "device"
-    float *d_a = nullptr, *d_b = nullptr, *d_c = nullptr;
 };
 
-// --- Набор тестов ---
-// Каждый TEST_F - это отдельный сценарий, использующий наш класс VectorAddTest.
+// Определяем сам параметризованный тест
+TEST_P(VectorAddComparisonTest, GpuVsCpu) {
+    // 1. ПОДГОТОВКА (Arrange)
+    // Получаем размер вектора из параметров теста
+    std::size_t n = GetParam();
 
-// Тест со стандартным размером вектора
-TEST_F(VectorAddTest, HandlesStandardSize) {
-    PrepareData(1024);
-    RunAndVerify();
+    if (n == 0) {
+        // Проверяем нулевой размер как граничный случай
+        std::vector<float> a, b, c_gpu;
+        // Ожидаем, что вызов не вызовет падения
+        ASSERT_NO_THROW(vector_add(a.data(), b.data(), c_gpu.data(), n));
+        return; // Завершаем тест для n=0
+    }
+    
+    // Создаем векторы на хосте (CPU)
+    std::vector<float> h_a(n);
+    std::vector<float> h_b(n);
+    
+    // Заполняем их случайными данными
+    generate_random_vector(h_a);
+    generate_random_vector(h_b);
+
+    // Векторы для хранения результатов
+    std::vector<float> c_result_gpu(n); // Сюда запишется результат с GPU
+    std::vector<float> c_result_cpu(n); // Сюда запишется эталонный результат с CPU
+
+    // 2. ДЕЙСТВИЕ (Act)
+    // Выполняем сложение на GPU
+    vector_add(h_a.data(), h_b.data(), c_result_gpu.data(), n);
+    
+    // Выполняем сложение на CPU для получения эталона
+    vector_add_cpu(h_a.data(), h_b.data(), c_result_cpu.data(), n);
+
+    // 3. ПРОВЕРКА (Assert)
+    // Сравниваем результаты поэлементно
+    for (std::size_t i = 0; i < n; ++i) {
+        // Используем EXPECT_FLOAT_EQ для корректного сравнения чисел с плавающей точкой
+        EXPECT_FLOAT_EQ(c_result_gpu[i], c_result_cpu[i]) 
+            << "Mismatch at index " << i; // Сообщение в случае ошибки
+    }
 }
 
-// Тест с вектором нулевого размера (граничный случай)
-TEST_F(VectorAddTest, HandlesZeroSizeVector) {
-    PrepareData(0);
-    RunAndVerify();
-}
-
-// Тест с вектором из одного элемента (граничный случай)
-TEST_F(VectorAddTest, HandlesSingleElementVector) {
-    PrepareData(1);
-    RunAndVerify();
-}
-
-// Тест с размером, который не делится нацело на стандартный размер блока CUDA (важно!)
-TEST_F(VectorAddTest, HandlesNonDivisibleSize) {
-    PrepareData(999);
-    RunAndVerify();
-}
-
-// Тест с большим вектором (проверка производительности и стабильности)
-TEST_F(VectorAddTest, HandlesLargeVector) {
-    PrepareData(1 << 16); // 65536 элементов
-    RunAndVerify();
-}
+// "Оживляем" наш тест, передавая ему набор размеров, на которых нужно запуститься.
+INSTANTIATE_TEST_SUITE_P(
+    VectorAddTestSuite,
+    VectorAddComparisonTest,
+    ::testing::Values(
+        0,          // Граничный случай: нулевой размер
+        1,          // Один элемент
+        127,        // Чуть меньше размера одного блока (256)
+        256,        // Ровно один блок
+        257,        // Чуть больше одного блока
+        1024,       // Несколько полных блоков
+        2000,       // Размер, не кратный размеру блока
+        65536       // Большой размер для проверки производительности и стабильности
+    )
+);
