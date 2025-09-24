@@ -1,23 +1,24 @@
 cmake_minimum_required(VERSION 3.24)
 project(work1_benchmarks LANGUAGES CXX)
 
-set(DCMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES OFF)
 set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_LIBRARIES OFF)
 set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_OBJECTS OFF)
-set(DCMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Закомментируем эти строки, так как файлов нет
 # include(../../cmake/deps/gbench.cmake)
 # include(../../cmake/deps/eigen.cmake)
 
 find_package(CUDAToolkit REQUIRED)
+# find_package(benchmark REQUIRED)
+# find_package(Eigen3 REQUIRED)
 
-file(GLOB_RECURSE SRC
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
-)
+# file(GLOB_RECURSE SRC
+#     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cu
+# )
 
-add_executable(work1_benchmarks ${SRC})
+add_executable(work1_benchmarks perf_benchmark.cu)
 
 target_compile_features(work1_benchmarks PRIVATE
     cxx_std_20
