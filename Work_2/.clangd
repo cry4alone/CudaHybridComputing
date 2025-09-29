@@ -1,0 +1,44 @@
+If:
+  PathMatch: ".*\\.(cu|cuh)"
+
+CompileFlags:
+  Compiler: /usr/local/cuda-12.5/bin/nvcc
+  Add:
+    - "-x"
+    - "cuda"
+    - "--cuda-path=/usr/local/cuda-12.5"
+    - "--cuda-gpu-arch=sm_75"
+    - "-I/usr/local/cuda-12.5/include"
+    - "-I${workspaceFolder}/core/includes"
+    - "-std=c++20"
+    - "-D__CLANGD__"
+    - "-D__CUDA_ARCH__=750"
+  Remove:
+    - "-gencode*"
+    - "-Xcompiler=-fPIC"
+    - "-rdc=true"
+    - "-rdc=false"
+    - "-Wno-deprecated-gpu-targets"
+    - "-Xfatbin*"
+    - "--generate-code*"
+    - "-ccbin*"
+    - "--compiler-options*"
+    - "--expt-extended-lambda"
+    - "--expt-relaxed-constexpr"
+    - "-Werror=cross-execution-space-call"
+    - "--options-file"
+    - "-arch=native"
+
+Hover:
+  ShowAKA: No
+
+InlayHints:
+  Enabled: No
+
+Diagnostics:
+  Suppress:
+    - "variadic_device_fn"
+    - "attributes_not_allowed"
+    - "unknown_type_name"
+    - "use_of_undeclared_identifier"
+    - "no_member_named"
