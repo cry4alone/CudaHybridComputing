@@ -6,8 +6,8 @@ set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES OFF)
 set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_LIBRARIES OFF)
 set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_OBJECTS OFF)
 
-# option(ENABLE_TESTS "Enable tests" ON)
-# option(ENABLE_BENCH "Enable benchmarks" ON)
+option(ENABLE_TESTS "Enable tests" ON)
+option(ENABLE_BENCH "Enable benchmarks" ON)
 
 # --- Настройка зависимостей ---
 include(FetchContent)
