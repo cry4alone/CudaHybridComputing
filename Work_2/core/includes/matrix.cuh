@@ -60,6 +60,8 @@ public:
     size_t rows() const { return rows_; }
     size_t cols() const { return cols_; }
 
+    [[nodiscard]] std::vector<float> to_host() const { return data_->to_host();}
+
     MatrixView view() const;
 
     Matrix(Matrix&&) = default;

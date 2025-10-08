@@ -1,6 +1,33 @@
 #include "../includes/matrix.cuh"
 #include <cassert>
 
+__global__ void kernel_matmul_naive(MatrixView A, MatrixView B, MatrixView C);
+
+Matrix operator*(const Matrix& A, const Matrix& B) {
+    assert(A.cols() == B.rows());
+
+    size_t m = A.rows();
+    size_t n = B.cols();
+    size_t k = A.cols();
+
+    Matrix C(m, n);
+
+    dim3 blockDim(32, 32);
+    
+    dim3 gridDim((unsigned int)(n + blockDim.x - 1) / blockDim.x,
+                   (unsigned int)(m + blockDim.y - 1) / blockDim.y);
+
+    kernel_matmul_naive<<<gridDim, blockDim>>>(A.view(), B.view(), C.view());
+
+    cudaDeviceSynchronize(); 
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "CUDA error: %s\n", cudaGetErrorString(err));
+    }
+
+    return C;
+}
+
 Data::Data(size_t r, size_t c) : rows(r), cols(c) {
     cudaMalloc(&d_data, rows * cols * sizeof(float));
 }
