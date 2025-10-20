@@ -1,28 +1,28 @@
 #include <cassert>
+#include <iostream>
 #include "../includes/matrix.cuh"
-
-__global__ void kernel_matmul_naive(MatrixView a, MatrixView b, MatrixView c);
+#include "../includes/kernels.cuh"
 
 Matrix operator*(const Matrix& a, const Matrix& b) {
   assert(a.cols() == b.rows());
 
-  size_t m = a.rows();
-  size_t n = b.cols();
-  size_t k = a.cols();
+  const size_t m = a.rows();
+  const size_t n = b.cols();
+  const size_t k = a.cols();
+  (void)k; // silence unused when NDEBUG
 
   Matrix c(m, n);
 
-  dim3 blockDim(32, 32);
+  launch_matmul_shmem(a.view(), b.view(), c.view(), 0);
 
-  dim3 gridDim((unsigned int)(n + blockDim.x - 1) / blockDim.x,
-      (unsigned int)(m + blockDim.y - 1) / blockDim.y);
-
-  kernel_matmul_naive<<<gridDim, blockDim>>>(a.view(), b.view(), c.view());
-
-  cudaDeviceSynchronize();
   cudaError_t err = cudaGetLastError();
   if (err != cudaSuccess) {
-    fprintf(stderr, "cUDa error: %s\n", cudaGetErrorString(err));
+    std::cerr << "CUDA kernel launch error: " << cudaGetErrorString(err) << '\n';
+  }
+  // Ensure kernel completion before returning to avoid use-after-free when Matrix goes out of scope in callers
+  err = cudaDeviceSynchronize();
+  if (err != cudaSuccess) {
+    std::cerr << "CUDA sync error: " << cudaGetErrorString(err) << '\n';
   }
 
   return c;

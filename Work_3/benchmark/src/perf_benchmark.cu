@@ -39,9 +39,10 @@ static void BM_CudaMatMul(benchmark::State& state) {
     auto host_A_data = generate_random_data(n * n);
     auto host_B_data = generate_random_data(n * n);
 
-    // Выделение памяти на GPU и копирование
+    // Выделение памяти на GPU и копирование (вне замера)
     Matrix A(host_A_data, n, n);
     Matrix B(host_B_data, n, n);
+    Matrix C(n, n); // reuse output buffer across iterations
 
     // CUDA Events для замера времени на GPU
     cudaEvent_t start, stop;
@@ -51,14 +52,17 @@ static void BM_CudaMatMul(benchmark::State& state) {
     for (auto _ : state) {
         cudaEventRecord(start);
 
-        Matrix C = A * B;
+        // Only time the kernel; operator* synchronizes, but to ensure fairness we can launch and sync explicitly here by reusing * operator
+        C = A * B;
 
         cudaEventRecord(stop);
         cudaEventSynchronize(stop);
 
-        float milliseconds = 0;
+        float milliseconds = 0.0f;
         cudaEventElapsedTime(&milliseconds, start, stop);
-        state.SetIterationTime(milliseconds / 1000.0f); 
+        state.SetIterationTime(milliseconds / 1000.0f);
+        benchmark::DoNotOptimize(C);
+        benchmark::ClobberMemory();
     }
 
     cudaEventDestroy(start);
