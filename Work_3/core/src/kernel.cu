@@ -1,5 +1,5 @@
-﻿#include "../includes/matrix_view.cuh"
-#include "../includes/kernels.cuh"
+﻿#include "../includes/kernels.cuh"
+#include "../includes/matrix_view.cuh"
 
 __global__ void kernel_matmul_naive(MatrixView a, MatrixView b, MatrixView c) {
   int row = blockIdx.y * blockDim.y + threadIdx.y;
@@ -14,8 +14,14 @@ __global__ void kernel_matmul_naive(MatrixView a, MatrixView b, MatrixView c) {
   }
 }
 
-__global__ void kernel_matmul_shmem(
-    MatrixView A, MatrixView B, MatrixView C, int TILE) {
+void launch_matmul_naive(MatrixView a, MatrixView b, MatrixView c, cudaStream_t stream) {
+  dim3 block(16, 16);
+  dim3 grid((unsigned int)((c.cols() + 15) / 16), (unsigned int)((c.rows() + 15) / 16));
+
+  kernel_matmul_naive<<<grid, block, 0, stream>>>(a, b, c);
+}
+
+__global__ void kernel_matmul_shmem(MatrixView A, MatrixView B, MatrixView C, int TILE) {
 
   extern __shared__ float shared_mem[];
   float* As = shared_mem;
@@ -40,7 +46,6 @@ __global__ void kernel_matmul_shmem(
       As[threadIdx.y * TILE + threadIdx.x] = 0.0f;
     }
 
-
     if (b_row < K && col < N) {
       Bs[threadIdx.y * TILE + threadIdx.x] = B(b_row, col);
     } else {
@@ -53,8 +58,6 @@ __global__ void kernel_matmul_shmem(
       acc += As[threadIdx.y * TILE + k] * Bs[k * TILE + threadIdx.x];
     }
 
-    // Ensure all threads have finished using the current As/Bs tiles
-    // before any thread overwrites them in the next iteration.
     __syncthreads();
   }
 
@@ -63,11 +66,9 @@ __global__ void kernel_matmul_shmem(
   }
 }
 
-void launch_matmul_shmem(MatrixView a, MatrixView b, MatrixView c, 
-                                 int TILE) {
+void launch_matmul_shmem(MatrixView a, MatrixView b, MatrixView c, int TILE) {
   dim3 block(TILE, TILE);
-  dim3 grid((c.cols() + TILE - 1) / TILE,
-            (c.rows() + TILE - 1) / TILE);
+  dim3 grid((c.cols() + TILE - 1) / TILE, (c.rows() + TILE - 1) / TILE);
 
   size_t shared_mem_size = 2 * TILE * TILE * sizeof(float);
   kernel_matmul_shmem<<<grid, block, shared_mem_size>>>(a, b, c, TILE);

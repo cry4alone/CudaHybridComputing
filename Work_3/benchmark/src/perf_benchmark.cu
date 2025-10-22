@@ -1,73 +1,84 @@
-#include "benchmark/benchmark.h"
-#include "matrix.cuh"
-#include <Eigen/Dense>
-#include <vector>
 #include <random>
+#include <vector>
+#include "benchmark/benchmark.h"
+#include "kernels.cuh"
+#include "matrix.cuh"
 
-// Функция для генерации случайных данных
+void multiply_naive(const Matrix& a, const Matrix& b, Matrix& c) {
+  launch_matmul_naive(a.view(), b.view(), c.view(), 0);
+}
+
+void multiply_tiled(const Matrix& a, const Matrix& b, Matrix& c) {
+  launch_matmul_shmem(a.view(), b.view(), c.view(), 16);
+}
+
+struct NaiveAlgo {
+  static void multiply(const Matrix& a, const Matrix& b, Matrix& c) {
+    multiply_naive(a, b, c);
+  }
+};
+
+struct TiledAlgo {
+  static void multiply(const Matrix& a, const Matrix& b, Matrix& c) {
+    multiply_tiled(a, b, c);
+  }
+};
+
 std::vector<float> generate_random_data(size_t size) {
-    std::vector<float> data(size);
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(0.0, 1.0);
-    for (size_t i = 0; i < size; ++i) {
-        data[i] = dis(gen);
-    }
-    return data;
+  std::vector<float> data(size);
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<> dis(0.0, 1.0);
+  for (size_t i = 0; i < size; ++i) {
+    data[i] = dis(gen);
+  }
+  return data;
 }
 
-// Бенчмарк для Eigen (CPU)
-static void BM_EigenMatMul(benchmark::State& state) {
-    const size_t n = state.range(0);
+template <typename MatMulStrategy>
+static void BM_GpuMatMul(benchmark::State& state) {
+  const size_t n = state.range(0);
 
-    Eigen::MatrixXf A = Eigen::MatrixXf::Random(n, n);
-    Eigen::MatrixXf B = Eigen::MatrixXf::Random(n, n);
-    Eigen::MatrixXf C(n, n);
+  std::vector<float> host_A_data(n * n, 1.0f);
+  std::vector<float> host_B_data(n * n, 2.0f);
 
-    for (auto _ : state) {
-        C = A * B;
-        benchmark::DoNotOptimize(C.data());
-    }
+  Matrix A(host_A_data, n, n);
+  Matrix B(host_B_data, n, n);
+  Matrix C(n, n);
+
+  cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop);
+
+  for (auto _ : state) {
+    cudaEventRecord(start);
+
+    MatMulStrategy::multiply(A, B, C);
+
+    cudaEventRecord(stop);
+    cudaEventSynchronize(stop);
+
+    float milliseconds = 0;
+    cudaEventElapsedTime(&milliseconds, start, stop);
+    state.SetIterationTime(milliseconds / 1000.0f);
+  }
+
+  cudaEventDestroy(start);
+  cudaEventDestroy(stop);
 }
-BENCHMARK(BM_EigenMatMul)->RangeMultiplier(2)->Range(16, 1024)->Unit(benchmark::kMillisecond);
 
-// Бенчмарк для CUDA (GPU)
-static void BM_CudaMatMul(benchmark::State& state) {
-    const size_t n = state.range(0);
+BENCHMARK_TEMPLATE(BM_GpuMatMul, NaiveAlgo)
+    ->RangeMultiplier(2)
+    ->Range(64, 1024)
+    ->Unit(benchmark::kMillisecond)
+    ->UseManualTime()
+    ->Name("BM_CudaMatMul/Naive");
 
-    // Подготовка данных на хосте
-    auto host_A_data = generate_random_data(n * n);
-    auto host_B_data = generate_random_data(n * n);
-
-    // Выделение памяти на GPU и копирование (вне замера)
-    Matrix A(host_A_data, n, n);
-    Matrix B(host_B_data, n, n);
-    Matrix C(n, n); // reuse output buffer across iterations
-
-    // CUDA Events для замера времени на GPU
-    cudaEvent_t start, stop;
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
-
-    for (auto _ : state) {
-        cudaEventRecord(start);
-
-        // Only time the kernel; operator* synchronizes, but to ensure fairness we can launch and sync explicitly here by reusing * operator
-        C = A * B;
-
-        cudaEventRecord(stop);
-        cudaEventSynchronize(stop);
-
-        float milliseconds = 0.0f;
-        cudaEventElapsedTime(&milliseconds, start, stop);
-        state.SetIterationTime(milliseconds / 1000.0f);
-        benchmark::DoNotOptimize(C);
-        benchmark::ClobberMemory();
-    }
-
-    cudaEventDestroy(start);
-    cudaEventDestroy(stop);
-}
-BENCHMARK(BM_CudaMatMul)->RangeMultiplier(2)->Range(16, 1024)->Unit(benchmark::kMillisecond)->UseManualTime();
+BENCHMARK_TEMPLATE(BM_GpuMatMul, TiledAlgo)
+    ->RangeMultiplier(2)
+    ->Range(64, 1024)
+    ->Unit(benchmark::kMillisecond)
+    ->UseManualTime()
+    ->Name("BM_CudaMatMul/Tiled_16");
 
 BENCHMARK_MAIN();
