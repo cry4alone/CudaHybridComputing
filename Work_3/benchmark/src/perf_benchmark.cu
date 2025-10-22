@@ -39,8 +39,8 @@ template <typename MatMulStrategy>
 static void BM_GpuMatMul(benchmark::State& state) {
   const size_t n = state.range(0);
 
-  std::vector<float> host_A_data(n * n, 1.0f);
-  std::vector<float> host_B_data(n * n, 2.0f);
+  auto host_A_data = generate_random_data(n * n);
+  auto host_B_data = generate_random_data(n * n);
 
   Matrix A(host_A_data, n, n);
   Matrix B(host_B_data, n, n);
