@@ -13,7 +13,7 @@ Matrix operator*(const Matrix& a, const Matrix& b) {
 
   Matrix c(m, n);
 
-  launch_matmul_shmem(a.view(), b.view(), c.view(), 0);
+  launch_matmul_shmem(a.view(), b.view(), c.view(), 16);
 
   cudaError_t err = cudaGetLastError();
   if (err != cudaSuccess) {
