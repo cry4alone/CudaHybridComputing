@@ -11,8 +11,14 @@ set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_OBJECTS OFF)
 set(DCMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
-file(GLOB_RECURSE SRC
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cu
+set(SRC
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/data.cu
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/matrix.cu
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/matrix_view.cu
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/kernels/matmul_shmem_kernel.cu
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/kernels/matmul_wmma_kernel.cu
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/launch/matmul_shmem_launch.cu
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/launch/matmul_wmma_launch.cu
 )
 
 add_library(work4_core SHARED ${SRC})
