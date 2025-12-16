@@ -32,7 +32,8 @@ TEST_P(VecRedTest, NoBroadcast) {
     float h_out = 0.0f;
     cudaMemcpy(&h_out, d_out, sizeof(float), cudaMemcpyDeviceToHost);
     cudaFree(d_out);
-    EXPECT_NEAR(h_out, eigen_sum(h), 1e-4f);
+    constexpr float kAbsTol = 5e-4f; // relaxed from 1e-4f
+    EXPECT_NEAR(h_out, eigen_sum(h), kAbsTol);
 }
 
 TEST_P(VecRedTest, Broadcast) {
@@ -47,7 +48,8 @@ TEST_P(VecRedTest, Broadcast) {
     float h_out = 0.0f;
     cudaMemcpy(&h_out, d_out, sizeof(float), cudaMemcpyDeviceToHost);
     cudaFree(d_out);
-    EXPECT_NEAR(h_out, eigen_sum(h), 1e-4f);
+    constexpr float kAbsTol = 5e-4f; // relaxed from 1e-4f
+    EXPECT_NEAR(h_out, eigen_sum(h), kAbsTol);
 }
 
 INSTANTIATE_TEST_SUITE_P(

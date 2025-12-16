@@ -19,7 +19,11 @@ set(SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/kernels/matmul_wmma_kernel.cu
     ${CMAKE_CURRENT_SOURCE_DIR}/src/launch/matmul_shmem_launch.cu
     ${CMAKE_CURRENT_SOURCE_DIR}/src/launch/matmul_wmma_launch.cu
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/kernels/vecred_kernels.cu
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/kernels/vecred_nobr_kernel.cu
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/kernels/vecred_br_kernel.cu
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/launch/vecred_nobr_launch.cu
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/launch/vecred_br_launch.cu
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/launch/vecred_reduce_utils.cu
 )
 
 add_library(work4_core SHARED ${SRC})
