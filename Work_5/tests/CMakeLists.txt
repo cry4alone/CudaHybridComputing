@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(work4_tests LANGUAGES CXX CUDA)
+project(work5_tests LANGUAGES CXX CUDA)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES OFF)
@@ -10,29 +10,29 @@ find_package(CUDAToolkit REQUIRED)
 
 set_source_files_properties(src/unit_tests.cpp PROPERTIES LANGUAGE CUDA)
 
-add_executable(work4_tests src/unit_tests.cpp)
+add_executable(work5_tests src/unit_tests.cpp)
 
 set(CMAKE_CUDA_ARCHITECTURES 50)
 
 
-set_target_properties(work4_tests PROPERTIES
+set_target_properties(work5_tests PROPERTIES
     CUDA_SEPARABLE_COMPILATION ON
 )
 
-target_compile_features(work4_tests PRIVATE
+target_compile_features(work5_tests PRIVATE
     cxx_std_20
 )
 
-target_compile_options(work4_tests PRIVATE
+target_compile_options(work5_tests PRIVATE
     -Wall -O3
 )
 
-target_link_libraries(work4_tests PRIVATE
-    work4::core
+target_link_libraries(work5_tests PRIVATE
+    work5::core
     CUDA::cudart
     GTest::gtest_main 
     Eigen3::Eigen     
 )
 
 enable_testing()
-gtest_discover_tests(work4_tests)
+gtest_discover_tests(work5_tests)

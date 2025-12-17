@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(work4 LANGUAGES CXX CUDA)
+project(work5 LANGUAGES CXX CUDA)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES OFF)
@@ -38,7 +38,7 @@ endif()
 find_package(Eigen3 3.4.0 REQUIRED)
 
 add_subdirectory(core)
-set_target_properties(work4_core PROPERTIES CUDA_ARCHITECTURES 75)
+set_target_properties(work5_core PROPERTIES CUDA_ARCHITECTURES 75)
 
 if(ENABLE_TESTS)
     add_subdirectory(tests)

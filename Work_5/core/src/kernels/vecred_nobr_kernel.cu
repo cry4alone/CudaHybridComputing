@@ -1,7 +1,6 @@
 #include <cuda_runtime.h>
 #include "../../includes/kernels.cuh"
 
-// Kernel (1): block-level reduction using shared memory, no warp shuffles
 __global__ void kernel_vecred_nobr_impl(VectorView v, float* partial_sums) {
     extern __shared__ float sdata[];
     const unsigned tid = threadIdx.x;
@@ -11,7 +10,6 @@ __global__ void kernel_vecred_nobr_impl(VectorView v, float* partial_sums) {
     sdata[tid] = x;
     __syncthreads();
 
-    // classic tree reduction in shared memory
     for (unsigned s = blockDim.x >> 1; s > 0; s >>= 1) {
         if (tid < s) {
             sdata[tid] += sdata[tid + s];

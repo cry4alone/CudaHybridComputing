@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(work4_core LANGUAGES CUDA)
+project(work5_core LANGUAGES CUDA)
 
 find_package(CUDAToolkit REQUIRED)
 
@@ -15,10 +15,6 @@ set(SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/data.cu
     ${CMAKE_CURRENT_SOURCE_DIR}/src/matrix.cu
     ${CMAKE_CURRENT_SOURCE_DIR}/src/matrix_view.cu
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/kernels/matmul_shmem_kernel.cu
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/kernels/matmul_wmma_kernel.cu
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/launch/matmul_shmem_launch.cu
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/launch/matmul_wmma_launch.cu
     ${CMAKE_CURRENT_SOURCE_DIR}/src/kernels/vecred_nobr_kernel.cu
     ${CMAKE_CURRENT_SOURCE_DIR}/src/kernels/vecred_br_kernel.cu
     ${CMAKE_CURRENT_SOURCE_DIR}/src/launch/vecred_nobr_launch.cu
@@ -26,26 +22,26 @@ set(SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/launch/vecred_reduce_utils.cu
 )
 
-add_library(work4_core SHARED ${SRC})
-add_library(work4::core ALIAS work4_core)
+add_library(work5_core SHARED ${SRC})
+add_library(work5::core ALIAS work5_core)
 
-set_target_properties(work4_core PROPERTIES
+set_target_properties(work5_core PROPERTIES
     CUDA_RUNTIME_LIBRARY Shared
     CUDA_SEPARABLE_COMPILATION ON
 )
 
-target_compile_features(work4_core PRIVATE
+target_compile_features(work5_core PRIVATE
     cuda_std_20
 )
 
-target_compile_options(work4_core PRIVATE
+target_compile_options(work5_core PRIVATE
     -Wall -O3 -Wno-deprecated-gpu-targets
 )
 
 # Исправляем путь с include на includes
-target_include_directories(work4_core PUBLIC
+target_include_directories(work5_core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/includes/
 )
 
 # Enable WMMA path by default
-target_compile_definitions(work4_core PUBLIC WORK4_USE_WMMA=1)
+target_compile_definitions(work5_core PUBLIC WORK5_USE_WMMA=1)

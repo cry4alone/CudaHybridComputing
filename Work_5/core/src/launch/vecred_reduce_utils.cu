@@ -5,7 +5,6 @@
 float reduce_on_host(const float* d_partial, int count) {
     std::vector<float> h(count);
     cudaMemcpy(h.data(), d_partial, sizeof(float) * count, cudaMemcpyDeviceToHost);
-    // Kahan compensated summation in double
     double sum = 0.0;
     double c = 0.0;
     for (int i = 0; i < count; ++i) {
